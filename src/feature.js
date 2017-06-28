@@ -25,8 +25,9 @@ Feature.fn = Feature.prototype;
  * @method fmtName
  */
 Feature.fn.fmtName = function() {
-  var first = this.name.charAt(0).toUpperCase();
-  return first.concat(this.name.substr(1));
+  // var first = this.name.charAt(0).toUpperCase();
+  // var formattedName = first.concat(this.name.substr(1));
+  return this.name;
 };
 
 module.exports = Feature;

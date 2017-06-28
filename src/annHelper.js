@@ -180,7 +180,13 @@ AnnHelper.fn.importAnns = function(anns) {
     f.anns = [];
 
     if (typeof anns[f.name] === 'undefined') {
-      continue; // Skip feature if there was no input attribute data
+      continue;
+    }
+    if (typeof anns[f.name]['shapes'] === 'undefined') {
+      continue;
+    }
+    if (typeof anns[f.name]['shapes'].length === 0) {
+      continue;
     }
 
     var input = anns[f.name];

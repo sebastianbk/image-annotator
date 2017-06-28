@@ -310,16 +310,16 @@ Annotator.fn.build = function($parent) {
                       .prop('disabled', true)
                       .appendTo(this.divLeft);
 
-  this.tip       = $('<span>Tip: Double-click the last point to complete a line or a polygon.</span>')
-                      .appendTo(this.divRight)
-                      .addClass("text-muted");
-
   this.gofull    = $('<button id="toggle_fullscreen">Toggle fullscreen</button>')
                       .appendTo(this.divRight)
-                      .css("margin-left", "10px")
+                      .css("margin-right", "10px")
                       .click(function () {
                         annotator.toggleFullscreen(annotator, true);
                       });
+
+  this.tip       = $('<span>Tip: Double-click last point to complete shape.</span>')
+                      .appendTo(this.divRight)
+                      .addClass("text-muted");
 
   if (document.addEventListener)
   {
@@ -358,7 +358,7 @@ Annotator.fn.build = function($parent) {
                       .appendTo(this.container);
 
   // Bottom controls
-  this.divBottom   = $('<div id="annotator-bottom-controls"></div>').appendTo($parent);
+  this.divBottom = $('<div id="annotator-bottom-controls"></div>').appendTo($parent);
   this.delAnn    = $('<button id="nextAnn">Delete Annotation</button>').appendTo(this.divBottom);
 
   // Disable some of the normal page interaction in the canvas area
@@ -556,7 +556,9 @@ Annotator.fn.updateFtrs = function(ftrs) {
 Annotator.fn.updateControls = function() {
   var ath = this.annHelper;
 
-  this.delAnn.prop('disabled', !ath.getAnn().valid || !this.img);
+  if (ath.getAnn()) {
+    this.delAnn.prop('disabled', !ath.getAnn().valid || !this.img);
+  }
   this.zoomin.prop('disabled', !this.img);
   this.zoomout.prop('disabled', !this.img);
   this.pan.prop('disabled', !this.img);
