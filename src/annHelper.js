@@ -202,7 +202,7 @@ AnnHelper.fn.importAnns = function(anns) {
       if (s.type === 'rect') {
         ann.pts[0] = s.pos;
         ann.pts[1] = {x : s.pos.x+s.size.width, y : s.pos.y+s.size.height};
-      } else if (s.type == 'point') {
+      } else if (s.type === 'point') {
         ann.pts[0] = s.pos;
       }
       else {

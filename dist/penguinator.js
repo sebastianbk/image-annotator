@@ -203,7 +203,7 @@ AnnHelper.fn.importAnns = function(anns) {
       if (s.type === 'rect') {
         ann.pts[0] = s.pos;
         ann.pts[1] = {x : s.pos.x+s.size.width, y : s.pos.y+s.size.height};
-      } else if (s.type == 'point') {
+      } else if (s.type === 'point') {
         ann.pts[0] = s.pos;
       }
       else {
@@ -807,6 +807,14 @@ Annotator.fn.build = function($parent) {
   // Controls
   this.zoomin    = $('<button id="zoomin">+</button>').appendTo(this.divLeft);
   this.zoomout   = $('<button id="zoomout">-</button>').appendTo(this.divLeft);
+  $(window).on('wheel', function(event) {
+    if(event.originalEvent.deltaY < 0) {
+      a.cHelper.zoom(1.25);
+    }
+    else {
+      a.cHelper.zoom(0.9);
+    }
+  });
   this.pan       = $('<button id="pan">Pan</button>').appendTo(this.divLeft)
                       .css("margin-right", "20px");
 
@@ -818,7 +826,7 @@ Annotator.fn.build = function($parent) {
                       .css("margin-right", "20px");
 
   this.title     = $('<label>Annotating:</label>').appendTo(this.divLeft)
-                      .css("margin-right", "10px")
+                      .css("margin-right", "10px");
 
   this.ftrSel    = $('<select id="ftrsel"></select>')
                       .html('<option>Image</option>')
