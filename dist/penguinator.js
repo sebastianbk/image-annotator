@@ -544,7 +544,7 @@ var canvascss = {
  * @param {Number} h Height of annotation area
  * @constructor
  */
-function Annotator(img, w, h) {
+function Annotator(img, w, h, options) {
   // Parameters
 
   /** @type {Image} The image being annotated. */
@@ -555,6 +555,9 @@ function Annotator(img, w, h) {
   this.h = h;
 
   // Controls
+  this.controls = options.controls;
+  this.options = options;
+
   this.divRight = null;
   this.divLeft = null;
   this.zoomin = null;
@@ -796,17 +799,7 @@ Annotator.fn.build = function($parent) {
   $parent.data("Annotator", this);
 
   var annotator = this;
-  console.log("Annotator", this);
 
-  // Top controls
-  this.divTop   = $('<div id="annotator-top-controls"></div>').appendTo($parent).css("width", "100%");
-  this.divRight  = $('<div></div>').appendTo(this.divTop).css("float", "right");
-  this.divLeft   = $('<div></div>').appendTo(this.divTop);
-  this.divClear   = $('<div></div>').appendTo(this.divTop).css("clear", "both");
-
-  // Controls
-  this.zoomin    = $('<button id="zoomin">+</button>').appendTo(this.divLeft);
-  this.zoomout   = $('<button id="zoomout">-</button>').appendTo(this.divLeft);
   $(window).on('wheel', function(event) {
     if(event.originalEvent.deltaY < 0) {
       a.cHelper.zoom(1.25);
@@ -815,35 +808,47 @@ Annotator.fn.build = function($parent) {
       a.cHelper.zoom(0.9);
     }
   });
-  this.pan       = $('<button id="pan">Pan</button>').appendTo(this.divLeft)
-                      .css("margin-right", "20px");
 
-  this.annotate  = $('<button id="annot">Annotate</button>').appendTo(this.divLeft);
-  this.annType   = $('<select id="typesel"></select>')
-                      .html('<option>Box</option><option>Line</option><option>Point</option><option>Polygon</option>')
-                      .appendTo(this.divLeft);
-  this.edit      = $('<button id="edit">Edit</button>').appendTo(this.divLeft)
-                      .css("margin-right", "20px");
+  if (this.controls) {
+    // Top controls
+    this.divTop   = $('<div id="annotator-top-controls"></div>').appendTo($parent).css("width", "100%");
+    this.divRight  = $('<div></div>').appendTo(this.divTop).css("float", "right");
+    this.divLeft   = $('<div></div>').appendTo(this.divTop);
+    this.divClear   = $('<div></div>').appendTo(this.divTop).css("clear", "both");
 
-  this.title     = $('<label>Annotating:</label>').appendTo(this.divLeft)
-                      .css("margin-right", "10px");
+    // Controls
+    this.zoomin    = $('<button id="zoomin">+</button>').appendTo(this.divLeft);
+    this.zoomout   = $('<button id="zoomout">-</button>').appendTo(this.divLeft);
+    this.pan       = $('<button id="pan">Pan</button>').appendTo(this.divLeft)
+                        .css("margin-right", "20px");
 
-  this.ftrSel    = $('<select id="ftrsel"></select>')
-                      .html('<option>Image</option>')
-                      .prop('disabled', true)
-                      .appendTo(this.divLeft);
+    this.annotate  = $('<button id="annot">Annotate</button>').appendTo(this.divLeft);
+    this.annType   = $('<select id="typesel"></select>')
+                        .html('<option>Box</option><option>Line</option><option>Point</option><option>Polygon</option>')
+                        .appendTo(this.divLeft);
+    this.edit      = $('<button id="edit">Edit</button>').appendTo(this.divLeft)
+                        .css("margin-right", "20px");
 
-  this.gofull    = $('<button id="toggle_fullscreen">Toggle fullscreen</button>')
-                      .appendTo(this.divRight)
-                      .css("margin-right", "10px")
-                      .click(function () {
-                        annotator.toggleFullscreen(annotator, true);
-                      });
+    this.title     = $('<label>Annotating:</label>').appendTo(this.divLeft)
+                        .css("margin-right", "10px");
 
-  this.tip       = $('<span>Tip: Double-click last point to complete shape.</span>')
-                      .appendTo(this.divRight)
-                      .addClass("text-muted");
+    this.ftrSel    = $('<select id="ftrsel"></select>')
+                        .html('<option>Image</option>')
+                        .prop('disabled', true)
+                        .appendTo(this.divLeft);
 
+    this.gofull    = $('<button id="toggle_fullscreen">Toggle fullscreen</button>')
+                        .appendTo(this.divRight)
+                        .css("margin-right", "10px")
+                        .click(function () {
+                          annotator.toggleFullscreen(annotator, true);
+                        });
+
+    this.tip       = $('<span>Tip: Double-click last point to complete shape.</span>')
+                        .appendTo(this.divRight)
+                        .addClass("text-muted");
+  }
+                    
   if (document.addEventListener)
   {
       document.addEventListener('webkitfullscreenchange', exitHandler, false);
@@ -880,10 +885,6 @@ Annotator.fn.build = function($parent) {
                       .css(canvascss)
                       .appendTo(this.container);
 
-  // Bottom controls
-  this.divBottom = $('<div id="annotator-bottom-controls"></div>').appendTo($parent);
-  this.delAnn    = $('<button id="nextAnn">Delete Annotation</button>').appendTo(this.divBottom);
-
   // Disable some of the normal page interaction in the canvas area
   this.canvas[0].onselectstart = function(){return false;};
   this.canvas[0].oncontextmenu = function(){return false;};
@@ -892,62 +893,68 @@ Annotator.fn.build = function($parent) {
   this.cHelper = new CanvasHelper(this);
 
   var a = this; // loss of context when defining callbacks
+                      
+  if (this.controls) {
+    // Bottom controls
+    this.divBottom = $('<div id="annotator-bottom-controls"></div>').appendTo($parent);
+    this.delAnn    = $('<button id="nextAnn">Delete Annotation</button>').appendTo(this.divBottom);
 
-  // Zoom control
-  this.zoomin.click(function(){a.cHelper.zoom(1.25);});
-  this.zoomout.click(function(){a.cHelper.zoom(0.8);});
+    // Zoom control
+    this.zoomin.click(function(){a.cHelper.zoom(1.25);});
+    this.zoomout.click(function(){a.cHelper.zoom(0.8);});
 
-  // Switching annotation modes
-  this.annType.change(function() {
-    var str = $(this).val();
+    // Switching annotation modes
+    this.annType.change(function() {
+      var str = $(this).val();
 
-    switch (str) {
-      case "Box":
-        a.annHelper.changeType("rect");
-        a.switchOp("annotate");
-        break;
-      case "Polygon":
-        a.annHelper.changeType("poly");
-        a.switchOp("annotate");
-        break;
-      case "Line":
-        a.annHelper.changeType("line");
-        a.switchOp("annotate");
-        break;
-      case "Point":
-        a.annHelper.changeType("point");
-        a.switchOp("annotate");
-        break;
-    }
-  });
-
-  // Switching features
-  this.ftrSel.change(function() {
-    var str = $(this).val();
-    var ftrs = a.annHelper.getFtrs();
-
-    for (var f = 0; f < ftrs.length; f++) {
-      var ftr = ftrs[f];
-
-      if (str === ftr.fmtName()) {
-        a.annHelper.setFtr(ftr);
-        return;
+      switch (str) {
+        case "Box":
+          a.annHelper.changeType("rect");
+          a.switchOp("annotate");
+          break;
+        case "Polygon":
+          a.annHelper.changeType("poly");
+          a.switchOp("annotate");
+          break;
+        case "Line":
+          a.annHelper.changeType("line");
+          a.switchOp("annotate");
+          break;
+        case "Point":
+          a.annHelper.changeType("point");
+          a.switchOp("annotate");
+          break;
       }
-    }
-  });
+    });
 
-  // Operation selection
-  this.pan.click(function(){ a.switchOp("pan"); });
-  this.annotate.click(function(){ a.switchOp("annotate"); });
-  this.edit.click(function(){ a.switchOp("edit"); });
+    // Switching features
+    this.ftrSel.change(function() {
+      var str = $(this).val();
+      var ftrs = a.annHelper.getFtrs();
 
-  // Annotation deletion
-  this.delAnn.click(function() {
-    a.annHelper.delAnn();
-    a.updateControls();
-    a.cHelper.repaint();
-  });
+      for (var f = 0; f < ftrs.length; f++) {
+        var ftr = ftrs[f];
 
+        if (str === ftr.fmtName()) {
+          a.annHelper.setFtr(ftr);
+          return;
+        }
+      }
+    });
+
+    // Operation selection
+    this.pan.click(function(){ a.switchOp("pan"); });
+    this.annotate.click(function(){ a.switchOp("annotate"); });
+    this.edit.click(function(){ a.switchOp("edit"); });
+
+    // Annotation deletion
+    this.delAnn.click(function() {
+      a.annHelper.delAnn();
+      a.updateControls();
+      a.cHelper.repaint();
+    });
+  }
+  
   // Mouse operations - call the tool handlers
   this.canvas.mousedown(function(e){ 
     if (a.img) {
@@ -988,7 +995,6 @@ Annotator.fn.build = function($parent) {
   this.container.keydown(function(e) {
     if (a.img) {
       var key = e.keyCode;
-      console.log("Key " + key);
       a.curTool.keyDown(key);
     }
   });
@@ -1020,28 +1026,36 @@ Annotator.fn.showChange = function() {
  * @method   lockSelect
  */
 Annotator.fn.lockSelect = function(type, lock) {
-  if (!this.img) {
-    this.annType.prop('disabled', true);
-  }
-  else {
-    this.annType.prop('disabled', lock);
+  if (this.controls) {
+    if (!this.img) {
+      this.annType.prop('disabled', true);
+    }
+    else {
+      this.annType.prop('disabled', lock);
 
-    if (lock) {
-      if (type === "rect") {
-        this.annType.val('Box');
-      }
-      else if (type === "poly") {
-        this.annType.val('Polygon');
-      }
-      else if (type === "line") {
-        this.annType.val('Line');
-      }
-      else {
-        this.annType.val('Point');
+      if (lock) {
+        if (type === "rect") {
+          this.annType.val('Box');
+        }
+        else if (type === "poly") {
+          this.annType.val('Polygon');
+        }
+        else if (type === "line") {
+          this.annType.val('Line');
+        }
+        else {
+          this.annType.val('Point');
+        }
       }
     }
   }
 };
+
+Annotator.fn.annotationDone = function(position) {
+  if(typeof (this.options.onAnnotationDone) !== 'undefined') {
+    this.options.onAnnotationDone(position);
+  }
+}
 
 /**
  * Selects a feature to display in the "selected feature" control.
@@ -1050,7 +1064,9 @@ Annotator.fn.lockSelect = function(type, lock) {
  * @method   dispFtr
  */
 Annotator.fn.dispFtr = function(ftr) {
-  this.ftrSel.val(ftr.fmtName());
+  if (this.controls) {
+    this.ftrSel.val(ftr.fmtName());
+  }
 };
 
 /**
@@ -1060,15 +1076,17 @@ Annotator.fn.dispFtr = function(ftr) {
  * @method   updateFtrs
  */
 Annotator.fn.updateFtrs = function(ftrs) {
-  var options = "";
-  this.ftrSel.prop('disabled', false);
+  if (this.controls) {
+    var options = "";
+    this.ftrSel.prop('disabled', false);
 
-  for (var f = 0; f < ftrs.length; f++) {
-    var ftr = ftrs[f];
-    options = options.concat("<option>" + ftr.fmtName() + "</option>");
+    for (var f = 0; f < ftrs.length; f++) {
+      var ftr = ftrs[f];
+      options = options.concat("<option>" + ftr.fmtName() + "</option>");
+    }
+
+    this.ftrSel.empty().html(options);
   }
-
-  this.ftrSel.empty().html(options);
 };
 
 /**
@@ -1077,16 +1095,18 @@ Annotator.fn.updateFtrs = function(ftrs) {
  * @method   updateControls
  */
 Annotator.fn.updateControls = function() {
-  var ath = this.annHelper;
+  if (this.controls) {
+    var ath = this.annHelper;
 
-  if (ath.getAnn()) {
-    this.delAnn.prop('disabled', !ath.getAnn().valid || !this.img);
+    if (ath.getAnn()) {
+      this.delAnn.prop('disabled', !ath.getAnn().valid || !this.img);
+    }
+    this.zoomin.prop('disabled', !this.img);
+    this.zoomout.prop('disabled', !this.img);
+    this.pan.prop('disabled', !this.img);
+    this.annotate.prop('disabled', !this.img);
+    this.edit.prop('disabled', !this.img);
   }
-  this.zoomin.prop('disabled', !this.img);
-  this.zoomout.prop('disabled', !this.img);
-  this.pan.prop('disabled', !this.img);
-  this.annotate.prop('disabled', !this.img);
-  this.edit.prop('disabled', !this.img);
 };
 
 //////////////////////////////////////////////////////
@@ -1135,12 +1155,19 @@ module.exports.annotator = function(input) {
   else if (typeof input.img === "undefined") {
     input.img = null;
   }
-
+  
   if (typeof input.features === "undefined") {
     input.features = null;
   }
   else if (!input.features instanceof Array) {
     throw "Error: input.features is not a valid Array instance";
+  }
+
+  if (typeof input.controls === "undefined") {
+    input.controls = true;
+  }
+  else if (!input.controls instanceof Boolean) {
+    throw "Error: input.controls is not a Boolean";
   }
 
   if (typeof input.width === "undefined")   {w = 640;}
@@ -1159,7 +1186,7 @@ module.exports.annotator = function(input) {
     a.update(input.img, w, h);
   }
   else {
-    a = new Annotator(input.img, w, h);
+    a = new Annotator(input.img, w, h, input);
     a.parent = $parent;
     a.build($parent);
   }
@@ -2412,6 +2439,9 @@ AnnTool.fn.lbUp = function(x, y) {
   var pt = a.cHelper.ptToImg(x, y);
 
   this.active = this.ann.addPt(pt);
+  if(!this.active) {
+    a.annotationDone({ x: x, y: y });
+  }
   a.showChange();
 };
 
@@ -2432,6 +2462,7 @@ AnnTool.fn.lbDbl = function(x, y) {
     this.ann.delPt(-1); // Remove pt from second click
     this.ann.delPt(-1); // Remove intermediate pt (would be next placed)
 
+    a.annotationDone({ x: x, y: y });
     a.showChange();
   }
 };
@@ -2556,6 +2587,7 @@ EditTool.fn.mMove = function(x, y) {
 EditTool.fn.lbDown = function(x, y) {
   var anh = this.parent.annHelper;
   var c = this.parent.cHelper;
+  var a = this.parent;
 
   var pt = c.ptToImg(x, y);
   var ann = anh.getAnn();

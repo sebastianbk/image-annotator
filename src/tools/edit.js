@@ -64,6 +64,7 @@ EditTool.fn.mMove = function(x, y) {
 EditTool.fn.lbDown = function(x, y) {
   var anh = this.parent.annHelper;
   var c = this.parent.cHelper;
+  var a = this.parent;
 
   var pt = c.ptToImg(x, y);
   var ann = anh.getAnn();

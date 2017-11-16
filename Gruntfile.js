@@ -8,7 +8,10 @@ module.exports = function(grunt) {
       ' Licensed <%= pkg.license %> */\n',
     uglify: {
       options: {
-        banner: '<%= banner %>'
+        banner: '<%= banner %>',
+        compress: {
+          drop_console: true
+        }
       },
       dist: {
         src: 'dist/penguinator.js',

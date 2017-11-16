@@ -16,12 +16,19 @@ module.exports.annotator = function(input) {
   else if (typeof input.img === "undefined") {
     input.img = null;
   }
-
+  
   if (typeof input.features === "undefined") {
     input.features = null;
   }
   else if (!input.features instanceof Array) {
     throw "Error: input.features is not a valid Array instance";
+  }
+
+  if (typeof input.controls === "undefined") {
+    input.controls = true;
+  }
+  else if (!input.controls instanceof Boolean) {
+    throw "Error: input.controls is not a Boolean";
   }
 
   if (typeof input.width === "undefined")   {w = 640;}
@@ -40,7 +47,7 @@ module.exports.annotator = function(input) {
     a.update(input.img, w, h);
   }
   else {
-    a = new Annotator(input.img, w, h);
+    a = new Annotator(input.img, w, h, input);
     a.parent = $parent;
     a.build($parent);
   }

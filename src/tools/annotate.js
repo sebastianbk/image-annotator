@@ -39,6 +39,9 @@ AnnTool.fn.lbUp = function(x, y) {
   var pt = a.cHelper.ptToImg(x, y);
 
   this.active = this.ann.addPt(pt);
+  if(!this.active) {
+    a.annotationDone({ x: x, y: y });
+  }
   a.showChange();
 };
 
@@ -59,6 +62,7 @@ AnnTool.fn.lbDbl = function(x, y) {
     this.ann.delPt(-1); // Remove pt from second click
     this.ann.delPt(-1); // Remove intermediate pt (would be next placed)
 
+    a.annotationDone({ x: x, y: y });
     a.showChange();
   }
 };
